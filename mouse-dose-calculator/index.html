@@ -1,1 +1,242 @@
-The requested file reference is not currently visible. Use files.search or files.list to rediscover the file, then retry with a returned ref_id or file_id.
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小鼠给药计算器（LANa / LANPs / D-gal）</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#13233f;--muted:#667085;--line:#dbe3ef;--blue:#2f67e8;--blue2:#2557b7;--blue-soft:#eef4ff;--green:#edf9f2;--green-text:#08783b;--amber:#fff8e6;--amber-text:#8a5a00;--shadow:0 10px 24px rgba(16,33,59,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:18px 18px 40px}
+.hero{background:linear-gradient(120deg,var(--blue2),var(--blue));color:#fff;border-radius:22px;padding:28px 30px;box-shadow:var(--shadow);margin-bottom:18px}
+.hero h1{margin:0 0 10px;font-size:28px}.hero p{margin:0;line-height:1.7;font-size:15px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:0;background:#e9eef6;color:#23324d;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;font-size:15px}
+.tab.active{background:var(--blue);color:#fff}.section{display:none}.section.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:920px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 8px;font-size:20px}.sub{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:16px}
+.pill{display:inline-block;background:#edf2f8;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:14px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:580px){.fields{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input{width:100%;padding:11px 12px;border:1px solid #cfd8e6;border-radius:11px;font-size:15px;background:#fff;color:#101828}
+input[disabled]{background:#f1f5f9;color:#475467;font-weight:700}
+.btn{margin-top:16px;background:var(--blue);color:#fff;border:0;border-radius:11px;padding:11px 16px;font-weight:700;cursor:pointer;font-size:15px}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:580px){.results{grid-template-columns:1fr}}
+.metric{background:#fbfcfe;border:1px solid var(--line);border-radius:16px;padding:14px 15px}
+.metric.primary{background:var(--blue-soft);border-color:#c8dcff}.k{font-size:12px;color:var(--muted);margin-bottom:6px}.v{font-size:18px;font-weight:800;line-height:1.35}
+.notice{margin-top:14px;background:var(--green);color:var(--green-text);border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.65}
+.warn{margin-top:10px;background:var(--amber);color:var(--amber-text);border-radius:12px;padding:10px 13px;font-size:12px;line-height:1.65}
+.formula{margin-top:14px;background:#101828;color:#fff;border-radius:14px;padding:14px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.75;overflow:auto}
+.footer-note{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>小鼠给药计算器</h1>
+    <p>LANa · LANPs · D-gal｜根据目标剂量、平均体重、饮水量、小鼠只数和计划配液体积，自动计算每日所需药量、终浓度、母液体积和补液体积。</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="lana">LANa 饮水给药</button>
+    <button class="tab" data-tab="lanps">LANPs 饮水给药</button>
+    <button class="tab" data-tab="dgal">D-gal 皮下注射</button>
+  </div>
+
+  <section id="lana" class="section active">
+    <div class="grid">
+      <div class="card">
+        <h2>LANa 饮水给药</h2>
+        <div class="sub">LANa 固定使用 <b>10 mg/mL 母液</b>。目标剂量按 <b>LA equivalent（LA 当量）</b>输入，网页自动换算实际所需 LANa 质量及母液体积。</div>
+        <div class="pill">LANa 固定母液：10 mg/mL</div>
+        <div class="fields">
+          <div><label>小鼠只数</label><input id="lana_n" type="number" step="1" value="9"></div>
+          <div><label>平均体重 (g/只)</label><input id="lana_wt" type="number" step="0.001" value="23"></div>
+          <div><label>目标剂量（LA 当量，mg/kg/day）</label><input id="lana_dose" type="number" step="0.01" value="120"></div>
+          <div><label>平均饮水量 (mL/只/day)</label><input id="lana_drink" type="number" step="0.01" value="4"></div>
+          <div><label>计划最终配液体积 (mL)</label><input id="lana_batch" type="number" step="0.1" value="40"></div>
+          <div><label>LANa 母液浓度 (mg/mL)</label><input value="10" disabled></div>
+        </div>
+        <button class="btn" onclick="calcLANa()">计算</button>
+      </div>
+
+      <div class="card">
+        <h2>结果</h2>
+        <div class="results">
+          <div class="metric"><div class="k">每只每日目标 LA 当量</div><div class="v" id="lana_r1">—</div></div>
+          <div class="metric"><div class="k">每只每日实际需 LANa</div><div class="v" id="lana_r2">—</div></div>
+          <div class="metric"><div class="k">饮水中 LANa 目标浓度</div><div class="v" id="lana_r3">—</div></div>
+          <div class="metric"><div class="k">整组理论日饮水量</div><div class="v" id="lana_r4">—</div></div>
+          <div class="metric"><div class="k">整组理论每日需 LANa</div><div class="v" id="lana_r5">—</div></div>
+          <div class="metric primary"><div class="k">计划最终配液体积</div><div class="v" id="lana_r6">—</div></div>
+          <div class="metric primary"><div class="k">该体积所需 LANa</div><div class="v" id="lana_r7">—</div></div>
+          <div class="metric primary"><div class="k">需加入 10 mg/mL LANa 母液</div><div class="v" id="lana_r8">—</div></div>
+          <div class="metric primary"><div class="k">加母液后补水至终体积</div><div class="v" id="lana_r9">—</div></div>
+        </div>
+        <div class="notice" id="lana_notice">LA MW = 206.33；LANa MW = 228.31；LANa/LA 摩尔质量换算系数约 1.1065。</div>
+        <div class="warn">“补水体积”为便捷估算。实际操作更建议先加入所需母液，再用饮水/溶剂定容至计划最终体积。</div>
+        <div class="formula">
+LA → LANa 换算系数 = 228.31 ÷ 206.33 ≈ 1.1065<br>
+每只每日 LA 当量 = 体重(g) ÷ 1000 × 目标剂量(mg/kg/day)<br>
+每只每日实际 LANa = LA 当量 × 1.1065<br>
+LANa 饮水目标浓度 = 每只每日 LANa ÷ 平均饮水量<br>
+计划体积所需 LANa = LANa 目标浓度 × 最终配液体积<br>
+10 mg/mL LANa 母液体积 = 所需 LANa ÷ 10<br>
+实际操作：加入母液后定容至计划最终体积
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lanps" class="section">
+    <div class="grid">
+      <div class="card">
+        <h2>LANPs 饮水给药</h2>
+        <div class="sub">LANPs 固定使用 <b>2.5 mg/mL 母液 / 分散液</b>。根据平均体重、饮水量和目标剂量计算终浓度、母液加入体积和补液体积。</div>
+        <div class="pill">LANPs 固定母液：2.5 mg/mL</div>
+        <div class="fields">
+          <div><label>小鼠只数</label><input id="np_n" type="number" step="1" value="9"></div>
+          <div><label>平均体重 (g/只)</label><input id="np_wt" type="number" step="0.001" value="23"></div>
+          <div><label>目标剂量 (mg/kg/day)</label><input id="np_dose" type="number" step="0.01" value="120"></div>
+          <div><label>平均饮水量 (mL/只/day)</label><input id="np_drink" type="number" step="0.01" value="4"></div>
+          <div><label>计划最终配液体积 (mL)</label><input id="np_batch" type="number" step="0.1" value="40"></div>
+          <div><label>LANPs 母液浓度 (mg/mL)</label><input value="2.5" disabled></div>
+        </div>
+        <button class="btn" onclick="calcLANPs()">计算</button>
+      </div>
+      <div class="card">
+        <h2>结果</h2>
+        <div class="results">
+          <div class="metric"><div class="k">每只每日需 LANPs</div><div class="v" id="np_r1">—</div></div>
+          <div class="metric"><div class="k">饮水目标浓度</div><div class="v" id="np_r2">—</div></div>
+          <div class="metric"><div class="k">整组理论日饮水量</div><div class="v" id="np_r3">—</div></div>
+          <div class="metric"><div class="k">整组理论每日需 LANPs</div><div class="v" id="np_r4">—</div></div>
+          <div class="metric primary"><div class="k">计划最终配液体积</div><div class="v" id="np_r5">—</div></div>
+          <div class="metric primary"><div class="k">该体积所需 LANPs</div><div class="v" id="np_r6">—</div></div>
+          <div class="metric primary"><div class="k">需加入 2.5 mg/mL 母液</div><div class="v" id="np_r7">—</div></div>
+          <div class="metric primary"><div class="k">加母液后补水至终体积</div><div class="v" id="np_r8">—</div></div>
+        </div>
+        <div class="notice" id="np_notice">LANPs 板块固定使用 2.5 mg/mL 母液。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dgal" class="section">
+    <div class="grid">
+      <div class="card">
+        <h2>D-gal 皮下注射</h2>
+        <div class="sub">D-gal 固定按 <b>100 μL/只</b>皮下注射。根据平均体重和目标剂量自动反算工作液浓度，并计算整组每日配液量和称粉量。</div>
+        <div class="pill">D-gal 固定注射体积：100 μL/只</div>
+        <div class="fields">
+          <div><label>小鼠只数</label><input id="dg_n" type="number" step="1" value="47"></div>
+          <div><label>平均体重 (g/只)</label><input id="dg_wt" type="number" step="0.001" value="23"></div>
+          <div><label>目标剂量 (mg/kg/day)</label><input id="dg_dose" type="number" step="0.01" value="400"></div>
+          <div><label>每只固定注射体积</label><input value="100 μL" disabled></div>
+          <div><label>配液余量 (%)</label><input id="dg_reserve" type="number" step="1" value="10"></div>
+          <div><label>D-gal 粉末纯度 / 有效含量 (%)</label><input id="dg_purity" type="number" step="0.1" value="100"></div>
+        </div>
+        <button class="btn" onclick="calcDgal()">计算</button>
+      </div>
+      <div class="card">
+        <h2>结果</h2>
+        <div class="results">
+          <div class="metric"><div class="k">每只每日需 D-gal</div><div class="v" id="dg_r1">—</div></div>
+          <div class="metric primary"><div class="k">固定每只注射体积</div><div class="v">100 μL</div></div>
+          <div class="metric primary"><div class="k">所需 D-gal 工作液浓度</div><div class="v" id="dg_r2">—</div></div>
+          <div class="metric"><div class="k">整组理论注射液体积</div><div class="v" id="dg_r3">—</div></div>
+          <div class="metric primary"><div class="k">建议每日工作液配制体积</div><div class="v" id="dg_r4">—</div></div>
+          <div class="metric primary"><div class="k">该工作液需有效 D-gal</div><div class="v" id="dg_r5">—</div></div>
+          <div class="metric primary"><div class="k">需称取 D-gal 粉末</div><div class="v" id="dg_r6">—</div></div>
+        </div>
+        <div class="notice" id="dg_notice">D-gal 固定 100 μL/只，体重变化时通过调整工作液浓度维持目标剂量。</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    说明：LANa 与 LANPs 饮水给药剂量均基于平均体重和平均饮水量估算。LANa 板块的目标剂量按 LA 当量输入；LANPs 板块固定使用 2.5 mg/mL 母液；D-gal 固定按 100 μL/只皮下注射。
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=(x,d=3)=>Number.isFinite(x)?Number(x).toLocaleString('zh-CN',{maximumFractionDigits:d}):'—';
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    $(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function calcLANa(){
+  const n=parseFloat($('lana_n').value), wt=parseFloat($('lana_wt').value),
+        dose=parseFloat($('lana_dose').value), drink=parseFloat($('lana_drink').value),
+        batch=parseFloat($('lana_batch').value);
+  const MW_LA=206.33, MW_LANa=228.31, factor=MW_LANa/MW_LA, stock=10;
+  const perLA=wt/1000*dose, perLANa=perLA*factor, conc=perLANa/drink,
+        groupWater=n*drink, groupLANa=n*perLANa, batchLANa=conc*batch,
+        stockVol=batchLANa/stock, approxWater=batch-stockVol;
+  $('lana_r1').textContent=fmt(perLA,4)+' mg/day';
+  $('lana_r2').textContent=fmt(perLANa,4)+' mg/day';
+  $('lana_r3').textContent=fmt(conc,4)+' mg/mL';
+  $('lana_r4').textContent=fmt(groupWater,2)+' mL/day';
+  $('lana_r5').textContent=fmt(groupLANa,3)+' mg/day';
+  $('lana_r6').textContent=fmt(batch,2)+' mL';
+  $('lana_r7').textContent=fmt(batchLANa,3)+' mg';
+  $('lana_r8').textContent=fmt(stockVol,3)+' mL';
+  $('lana_r9').textContent='约 '+fmt(approxWater,3)+' mL';
+  $('lana_notice').textContent='按当前参数，'+fmt(dose,1)+' mg/kg/day LA 当量相当于约 '+fmt(dose*factor,2)+' mg/kg/day LANa。配制 '+fmt(batch,2)+' mL 饮水时，加入 10 mg/mL LANa 母液 '+fmt(stockVol,3)+' mL，再补水定容至 '+fmt(batch,2)+' mL。';
+}
+
+function calcLANPs(){
+  const n=parseFloat($('np_n').value), wt=parseFloat($('np_wt').value),
+        dose=parseFloat($('np_dose').value), drink=parseFloat($('np_drink').value),
+        batch=parseFloat($('np_batch').value), stock=2.5;
+  const per=wt/1000*dose, conc=per/drink, groupWater=n*drink,
+        groupDrug=n*per, active=conc*batch, stockVol=active/stock,
+        approxWater=batch-stockVol;
+  $('np_r1').textContent=fmt(per,4)+' mg/day';
+  $('np_r2').textContent=fmt(conc,4)+' mg/mL';
+  $('np_r3').textContent=fmt(groupWater,2)+' mL/day';
+  $('np_r4').textContent=fmt(groupDrug,3)+' mg/day';
+  $('np_r5').textContent=fmt(batch,2)+' mL';
+  $('np_r6').textContent=fmt(active,3)+' mg';
+  $('np_r7').textContent=fmt(stockVol,3)+' mL';
+  $('np_r8').textContent='约 '+fmt(approxWater,3)+' mL';
+  $('np_notice').textContent=approxWater<0
+    ?'当前参数要求的终浓度高于 2.5 mg/mL 母液浓度，不能通过简单稀释获得。'
+    :'配制 '+fmt(batch,2)+' mL 饮水时，加入 2.5 mg/mL LANPs 母液 '+fmt(stockVol,3)+' mL，再补水定容至 '+fmt(batch,2)+' mL。';
+}
+
+function calcDgal(){
+  const n=parseFloat($('dg_n').value), wt=parseFloat($('dg_wt').value),
+        dose=parseFloat($('dg_dose').value), reserve=parseFloat($('dg_reserve').value)/100,
+        purity=parseFloat($('dg_purity').value)/100, fixedVol=0.1;
+  const per=wt/1000*dose, conc=per/fixedVol, groupVol=n*fixedVol,
+        prepVol=groupVol*(1+reserve), active=conc*prepVol, powder=active/purity;
+  $('dg_r1').textContent=fmt(per,4)+' mg/day';
+  $('dg_r2').textContent=fmt(conc,3)+' mg/mL';
+  $('dg_r3').textContent=fmt(groupVol,3)+' mL/day';
+  $('dg_r4').textContent=fmt(prepVol,3)+' mL';
+  $('dg_r5').textContent=fmt(active,3)+' mg';
+  $('dg_r6').textContent=fmt(powder/1000,5)+' g';
+  $('dg_notice').textContent='固定每只 100 μL：按当前平均体重 '+fmt(wt,3)+' g、目标剂量 '+fmt(dose,1)+' mg/kg/day，D-gal 工作液应配为 '+fmt(conc,3)+' mg/mL；若按 '+fmt(prepVol,3)+' mL 工作液配制，则需称取约 '+fmt(powder,3)+' mg（'+fmt(powder/1000,5)+' g）。';
+}
+
+document.querySelectorAll('input').forEach(el=>{
+  el.addEventListener('input',()=>{
+    if(el.id.startsWith('lana_'))calcLANa();
+    if(el.id.startsWith('np_'))calcLANPs();
+    if(el.id.startsWith('dg_'))calcDgal();
+  });
+});
+
+calcLANa(); calcLANPs(); calcDgal();
+</script>
+</body>
+</html>
