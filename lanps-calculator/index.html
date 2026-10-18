@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LANPs 制备与分装计算器</title>
+<style>
+:root{--ink:#17263b;--muted:#61758a;--teal:#087a78;--teal-deep:#095b60;--teal-light:#e6f4f1;--bg:#f4f7fa;--line:#dce5eb;--white:#fff;--amber:#a5640a;--amber-bg:#fff7e9;--red:#aa3442;--red-bg:#fff0f1;--shadow:0 12px 40px rgba(25,52,71,.065)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.62}
+button,input{font:inherit} input[readonly]{background:#f7fafb;color:#5e7183;cursor:default}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid rgba(15,131,128,.23);outline-offset:2px}
+.site-header{background:radial-gradient(circle at 88% 15%,#176f78 0%,transparent 38%),linear-gradient(125deg,#13253d 0%,#183a4e 60%,#105c64 100%);color:white;padding:38px max(24px,calc((100vw - 1240px)/2)) 35px;position:relative;overflow:hidden}
+.site-header:after{content:"";position:absolute;right:-78px;bottom:-190px;width:400px;height:400px;border:1px solid rgba(255,255,255,.11);border-radius:50%;pointer-events:none;box-shadow:0 0 0 66px rgba(255,255,255,.035),0 0 0 130px rgba(255,255,255,.02)}
+.header-inner{position:relative;z-index:1;max-width:1240px;margin:0 auto}
+.eyebrow{color:#9bdfd7;letter-spacing:.17em;font-size:11px;font-weight:800;text-transform:uppercase}
+h1{font-size:clamp(26px,3.4vw,39px);line-height:1.2;letter-spacing:-.035em;margin:10px 0 10px;font-weight:800}
+.subtitle{color:#c9e0e9;max-width:850px;font-size:14px;margin:0}
+.header-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.header-pills span{background:rgba(255,255,255,.085);border:1px solid rgba(255,255,255,.17);padding:5px 11px;border-radius:50px;font-size:12px;color:#edfafa}
+.shell{max-width:1290px;padding:27px 24px 80px;margin:auto}
+.main-grid{display:grid;grid-template-columns:minmax(320px,390px) minmax(0,1fr);gap:21px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.controls{padding:23px;position:sticky;top:14px}
+.title-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+h2{font-size:18px;margin:0;font-weight:800;letter-spacing:-.02em}
+h3{font-size:15px;margin:0;font-weight:750}
+.small-caption{color:var(--muted);font-size:12px;margin:5px 0 0}
+.text-btn{border:0;background:none;color:var(--teal);font-weight:700;padding:4px;text-align:center}
+.form-block{margin-top:22px}
+.field-label{display:block;font-size:12px;font-weight:750;margin-bottom:8px;color:#2d4052}
+.field-unit{font-size:12px;color:var(--muted);font-weight:500}
+.input-wrap{display:flex;border:1px solid #cbd9e2;border-radius:11px;overflow:hidden;background:white;transition:.2s}
+.input-wrap:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px #e5f2f2}
+.input-wrap input{min-width:0;width:100%;border:0;outline:none;background:transparent;padding:11px 13px;font-size:19px;color:var(--ink);font-weight:750;font-variant-numeric:tabular-nums}
+.unit{display:flex;align-items:center;padding:0 12px;background:#f5f8fa;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap;border-left:1px solid var(--line)}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.preset{background:#f4f8f9;border:1px solid #dce6e9;color:#506476;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.preset.active{background:#e3f4f1;border-color:#76c4ba;color:#05655f}
+.form-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.micro-note{color:var(--muted);font-size:11.5px;margin:7px 0 0;line-height:1.55}
+.divline{border:0;border-top:1px solid var(--line);margin:20px 0}
+.fixed-rule{border:1px solid #bfe0d7;border-radius:12px;padding:13px 14px;background:#f0faf7;margin-top:11px;color:#165d57;font-size:13px;line-height:1.7}.fixed-rule strong{display:block}.fixed-rule p{margin:6px 0 0;font-size:11.5px;color:#5a7775}
+.mode-list{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+.mode-option{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:11px;padding:10px 11px;cursor:pointer}
+.mode-option.active{border-color:#7bc1b7;background:#f0faf7}
+.mode-option input{accent-color:var(--teal);margin:4px 0 0}
+.mode-option strong{font-size:12.5px;display:block;line-height:1.4}
+.mode-option small{display:block;color:var(--muted);font-size:11px;line-height:1.5;margin-top:3px}
+#safe-setting{margin-top:13px;padding:10px 11px;background:#f7fafb;border-radius:10px;display:none}
+#safe-setting.shown{display:block}
+#safe-setting .input-wrap input{font-size:16px;padding:7px 10px}
+.side-tip{padding:11px 12px;background:#f2f7fa;border-radius:9px;color:#54687b;font-size:11.5px;margin-top:20px}
+.results{min-width:0}
+.section-pad{padding:23px}
+.topnote{margin:0 0 16px;color:var(--muted);font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.kpi{background:#f8fafb;border:1px solid #e3eaee;border-radius:12px;padding:14px 12px}
+.kpi.main{background:var(--teal-light);border-color:#c7e5df}
+.kpi .kpi-label{font-size:11px;color:#667b8a;display:block;font-weight:650}
+.kpi .kpi-value{font-size:clamp(19px,2vw,24px);font-weight:850;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1.3;margin:6px 0 3px;word-break:break-word}
+.kpi.main .kpi-value{color:var(--teal-deep)}
+.kpi .kpi-unit{color:var(--muted);font-size:11px}
+.subhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:22px;margin-bottom:12px}
+.chip{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--teal-light);color:var(--teal-deep);font-weight:750;white-space:nowrap}
+.recipe{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.recipe-card{border:1px solid #dfebef;border-radius:12px;padding:16px;background:#fff}
+.recipe-card .step-tag{font-size:10px;color:var(--teal);font-weight:900;letter-spacing:.1em}
+.recipe-card h3{margin:4px 0 8px;font-size:15px}
+.recipe-main{font-size:14px;margin:6px 0;font-variant-numeric:tabular-nums}
+.recipe-main strong{color:#14565b;font-weight:850}
+.formula{background:#f4f7f9;border-radius:8px;padding:9px 10px;margin-top:10px;color:#5e7183;font-size:11.5px}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:12px 14px;margin-top:16px;font-size:12px;line-height:1.6}
+.alert strong{display:block;font-size:12.5px;margin-bottom:2px}
+.alert.error{background:var(--red-bg);border:1px solid #f0c6cc;color:#872b37}
+.alert.ok{background:#edf8f3;border:1px solid #bee3d2;color:#1f6c52}
+.alert.caution{background:var(--amber-bg);border:1px solid #f0d6ad;color:#86550f}
+.alert .alert-icon{font-size:17px;line-height:1.4}
+.tube-overview{display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:center;background:#f8fafb;border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:12px}
+.tube-graphic{width:80px;height:137px;margin:auto;border:3px solid #91a3b4;border-radius:8px 8px 23px 23px;position:relative;overflow:hidden;background:linear-gradient(90deg,#edf1f5,#fff 45%,#f2f4f7)}
+.tube-graphic:before{content:"50 mL";position:absolute;top:6px;left:0;right:0;text-align:center;font-size:10px;color:#536578;z-index:2;font-weight:850}
+.tube-graphic .fill{position:absolute;bottom:0;width:100%;height:0;background:linear-gradient(90deg,#76cfbc,#3d9e9c 70%,#82d0c4);transition:height .25s}
+.tube-graphic .template-layer{position:absolute;bottom:0;width:100%;height:0;background:#f5bd75;transition:height .25s}
+.tube-graphic .overflow{position:absolute;top:1px;right:0;width:100%;height:4px;background:#de5660;display:none;z-index:3}
+.tube-legend{display:flex;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:11px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.tube-metric{font-weight:800;font-size:19px;font-variant-numeric:tabular-nums;margin:3px 0 6px}
+.tube-note{font-size:11px;color:#738495;margin:5px 0}
+.table-wrap{overflow:auto;border:1px solid #dfe7ec;border-radius:12px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{text-align:right;padding:11px 12px;border-bottom:1px solid #e6edf0;font-size:12px}
+th{background:#f4f8f9;color:#526b79;font-weight:750;font-size:11px}
+th:first-child,td:first-child{text-align:left;font-weight:750}
+tr:last-child td{border-bottom:0}
+.table-foot{color:var(--muted);font-size:11px;margin:9px 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:21px}
+.action{border:1px solid #bcd7d6;background:#fff;color:#146965;border-radius:9px;padding:9px 14px;font-weight:750;font-size:12px}
+.action.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.action:hover{filter:brightness(.97)}
+.invalid{border:1px solid #efc1c1;background:#fff1f1;color:#922c37;border-radius:10px;padding:13px;margin-top:18px;display:none}
+.protocol{margin-top:22px;padding:24px}
+.protocol-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.protocol-intro{color:var(--muted);font-size:12px;margin:6px 0 0}
+.timeline{margin-top:18px;display:grid;gap:10px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px 15px;border:1px solid #e2e9ed;background:#fbfcfd;border-radius:11px}
+.step.highlight{border-color:#c4dfd8;background:#f6fbf9}
+.step-n{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#deefec;color:#086d67;font-size:12px;font-weight:900}
+.step h3{font-size:13px;margin:1px 0 4px}
+.step p{margin:0;color:#4b6072;font-size:12px;line-height:1.8}
+.step-note{font-size:11px;color:#8794a0;margin-top:4px!important}
+.footer{color:#82929d;margin-top:20px;font-size:11px;text-align:center}
+@media(max-width:1100px){.main-grid{grid-template-columns:330px minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.recipe{grid-template-columns:1fr}}
+@media(max-width:760px){.site-header{padding:30px 20px}.shell{padding:16px 12px 60px}.main-grid{grid-template-columns:1fr}.controls{position:static}.section-pad,.controls,.protocol{padding:19px}.recipe{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.tube-overview{grid-template-columns:100px 1fr;gap:10px}.tube-graphic{height:121px;width:72px}}
+@media(max-width:490px){.recipe{grid-template-columns:1fr}.kpi{padding:12px 9px}.kpi .kpi-value{font-size:20px}.form-two{gap:9px}.header-pills span{font-size:10px}}
+@media print{body{background:white;font-size:12px}.site-header{padding:16px 10px;background:white!important;color:black!important}.site-header *{color:black!important}.shell{padding:10px}.main-grid{grid-template-columns:1fr;gap:12px}.controls{position:static}.panel{box-shadow:none;break-inside:avoid}.actions,.presets,.text-btn,.mode-list,#safe-setting{display:none!important}.header-pills{display:none}.protocol{margin-top:12px}.step{break-inside:avoid}.subhead{margin-top:12px}.kpis{grid-template-columns:repeat(4,1fr)}.recipe{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="eyebrow">LABORATORY WORKFLOW · LANPs</div>
+    <h1>LANPs 制备与分装计算器</h1>
+    <p class="subtitle">根据实验记录自动换算 LANa 水相、模板剂和每支 50 mL 离心管的配制量，并集中查看后续制备流程。</p>
+    <div class="header-pills"><span>第一步 · LANa 溶液</span><span>第二步 · 有机模板剂</span><span>50 mL 离心管</span><span>离线使用 · 无需联网</span></div>
+  </div>
+</header>
+<main class="shell">
+  <div class="main-grid">
+    <aside class="panel controls" aria-labelledby="config-title">
+      <div class="title-row"><h2 id="config-title">配制参数</h2><button type="button" class="text-btn" id="reset">恢复默认</button></div>
+      <p class="small-caption">修改任意参数，结果即时更新。</p>
+      <div class="form-block">
+        <label class="field-label" for="water-volume">计划配置的 LANa 水相体积 <span class="field-unit">（按加水量计）</span></label>
+        <div class="input-wrap"><input type="number" id="water-volume" value="1000" min="0.001" max="10000000" step="any" inputmode="decimal"/><span class="unit">mL</span></div>
+        <div class="presets" aria-label="常用体积快捷选择">
+          <button class="preset" type="button" data-volume="50">50 mL</button>
+          <button class="preset" type="button" data-volume="100">100 mL</button>
+          <button class="preset" type="button" data-volume="200">200 mL</button>
+          <button class="preset" type="button" data-volume="500">500 mL</button>
+          <button class="preset active" type="button" data-volume="1000">1 L</button>
+        </div>
+        <p class="micro-note">这里的“1 L”指加入 1,000 mL 水用于配制 LANa 水相，<b>不包括后续加入的模板剂</b>。</p>
+      </div>
+      <div class="form-block form-two">
+        <div><label class="field-label" for="lan-conc">LANa 投料浓度</label><div class="input-wrap"><input type="number" id="lan-conc" value="10" min="0.00001" max="100000" step="any"/><span class="unit">mg/mL</span></div></div>
+        <div><label class="field-label" for="template-rate">模板剂添加比例（固定）</label><div class="input-wrap"><input type="number" id="template-rate" value="3" readonly aria-readonly="true" title="分装比例固定为3%"/><span class="unit">% 水相 v/v</span></div></div>
+      </div>
+      <div class="form-block">
+        <label class="field-label">模板剂体积比 <span class="field-unit">十六烷 : 乙酸丁酯</span></label>
+        <div class="form-two">
+          <div><div class="input-wrap"><input type="number" id="hex-ratio" aria-label="十六烷比例" value="1" min="0.0001" max="100000" step="any"/><span class="unit">十六烷</span></div></div>
+          <div><div class="input-wrap"><input type="number" id="butyl-ratio" aria-label="乙酸丁酯比例" value="9" min="0.0001" max="100000" step="any"/><span class="unit">乙酸丁酯</span></div></div>
+        </div>
+        <p class="micro-note">默认 1 : 9；每 100 mL LANa 水相加入 3 mL 模板剂。</p>
+      </div>
+      <div class="form-block">
+        <label class="field-label" for="template-excess">模板剂预配余量 <span class="field-unit">（按实际需要加入量额外预配）</span></label>
+        <div class="input-wrap"><input type="number" id="template-excess" value="10" min="0" max="100" step="any" inputmode="decimal"/><span class="unit">%</span></div>
+        <p class="micro-note">默认额外配制 10%。例如需要加入 30 mL，实际预配 33 mL；<strong>仍仅向水相加入 30 mL</strong>，多出的 3 mL 用于移液损耗余量。</p>
+      </div>
+      <hr class="divline" />
+      <h3>50 mL 离心管 · 固定分装规则</h3>
+      <div class="fixed-rule"><strong>每管最多 40 mL LANa 水相 + 3% 模板剂</strong><p>满管：40 mL 水相 + 1.2 mL 模板剂 = 41.2 mL；不满40 mL的最后一管，按该管水相量的3%添加模板剂。模板剂预配10%余量不计入投料。</p></div>
+      <div class="side-tip">计算口径：LANa 质量 = 水相体积 × 投料浓度；实际加入模板剂 = 水相体积 × 添加比例；预配模板剂 = 实际加入量 × (1 + 余量%)。分管只使用<strong>实际加入量</strong>，不把余量加入反应体系。</div>
+    </aside>
+    <section class="results" aria-live="polite">
+      <div class="panel section-pad">
+        <div class="title-row"><h2>配制结果总览</h2><span class="chip" id="mode-chip">每管40 mL水相</span></div>
+        <p class="topnote">总用量与单管用量同时展示；计算随左侧参数实时更新。</p>
+        <div class="kpis">
+          <div class="kpi main"><span class="kpi-label">50 mL 离心管</span><div class="kpi-value" id="kpi-tubes">25 支</div><div class="kpi-unit" id="tube-count-detail">满管25支</div></div>
+          <div class="kpi"><span class="kpi-label">所需 LANa</span><div class="kpi-value" id="kpi-lana">10 g</div><div class="kpi-unit" id="lana-unit">10,000 mg</div></div>
+          <div class="kpi"><span class="kpi-label">需预配模板剂（含余量）</span><div class="kpi-value" id="kpi-template">33 mL</div><div class="kpi-unit" id="template-kpi-note">实际加入 30 mL · 余量 3 mL</div></div>
+          <div class="kpi"><span class="kpi-label">混合后理论总体积</span><div class="kpi-value" id="kpi-final">1,030 mL</div><div class="kpi-unit">水相 + 模板剂，未计溶解体积变化</div></div>
+        </div>
+        <div id="error-display" class="invalid" role="alert"></div>
+        <div class="subhead"><h3>先配制两份溶液</h3><span class="chip">总投料量</span></div>
+        <div class="recipe">
+          <div class="recipe-card"><div class="step-tag">STEP 01</div><h3>LANa 水溶液</h3><p class="recipe-main">称取 <strong id="recipe-lana">10 g</strong> LANa</p><p class="recipe-main">加入 <strong id="recipe-water">1,000 mL</strong> 超纯水</p><p class="micro-note">搅拌至完全溶解；按水相体积 × 标称浓度核算。</p><div class="formula" id="lan-formula">1,000 mL × 10 mg/mL = 10,000 mg</div></div>
+          <div class="recipe-card"><div class="step-tag">STEP 02</div><h3>有机模板剂（含预配余量）</h3><p class="recipe-main">十六烷：<strong id="recipe-hex">3.3 mL</strong></p><p class="recipe-main">乙酸丁酯：<strong id="recipe-butyl">29.7 mL</strong></p><p class="recipe-main">实际预配：<strong id="recipe-template">33 mL</strong></p><p class="micro-note">实验实际需要加入 <b id="recipe-required">30 mL</b>；额外预留 <b id="recipe-extra">3 mL</b>。<strong>不要将预配的 33 mL 全部加入水相。</strong></p><div class="formula" id="template-formula">需加 30 mL × (1 + 10%) = 预配 33 mL；十六烷 : 乙酸丁酯 = 1 : 9</div></div>
+        </div>
+        <div class="subhead"><h3>每支离心管需要加入</h3><span class="chip" id="tube-equivalence">25 管 · 每管40 mL水相</span></div>
+        <div class="tube-overview">
+          <div class="tube-graphic" role="img" aria-label="每管混合液体积占标称50毫升容量的示意图"><div class="fill" id="water-fill"></div><div class="template-layer" id="template-fill"></div><div class="overflow" id="overflow-mark"></div></div>
+          <div><div class="small-caption" id="tube-graphic-label">满管混合后理论装液量</div><div class="tube-metric" id="tube-total">41.2 / 50 mL</div><div class="tube-legend"><span><i class="dot" style="background:#53b0a4"></i>LANa 水相</span><span><i class="dot" style="background:#f5bd75"></i>模板剂</span></div><p class="tube-note" id="tube-fill-percent">约占标称容量 82.4%</p></div>
+        </div>
+        <div id="warning-box" class="alert ok" role="status"><span class="alert-icon">✓</span><div><strong id="warning-title">分装体积未超过标称容量</strong><span id="warning-text"></span></div></div>
+        <div class="subhead"><h3>每管分装明细</h3><span class="chip">全部50 mL离心管</span></div>
+        <div class="table-wrap"><table><thead><tr><th>分装对象</th><th>超纯水 / LANa 水相</th><th>LANa 投料量</th><th>模板剂</th><th>十六烷</th><th>乙酸丁酯</th><th>混合后体积</th></tr></thead><tbody id="per-tube-body"><tr><td>第1–25管（满管）</td><td>40 mL</td><td>400 mg</td><td>1,200 µL</td><td>120 µL</td><td>1,080 µL</td><td>41.2 mL</td></tr></tbody></table></div>
+        <p class="table-foot"><strong>本表的模板剂、十六烷、乙酸丁酯均是实际加入量，不包含预配余量。</strong> 优先每管40 mL水相，最后一管不足40 mL时单独列出。各管体积按未考虑溶解引起的微小体积变化计算；质量和体积显示值可能有四舍五入。</p>
+        <div class="actions"><button class="action primary" type="button" id="copy">复制配制清单</button><button class="action" type="button" id="csv">导出分装表 CSV</button><button class="action" type="button" id="print">打印 / 保存 PDF</button><span id="copy-feedback" role="status" style="font-size:12px;color:#087a78;align-self:center"></span></div>
+      </div>
+    </section>
+  </div>
+  <section class="panel protocol" id="protocol">
+    <div class="protocol-head"><div><h2>LANPs 后续制备步骤</h2><p class="protocol-intro">下列步骤根据你上传的手写实验记录整理。未注明的设备功率、温度、光照强度和处理条件不自行补写。</p></div><span class="chip">原始记录流程</span></div>
+    <div class="timeline">
+      <div class="step highlight"><div class="step-n">01</div><div><h3>配制 LANa 水溶液</h3><p id="protocol-step-1">称取 10 g LANa，加入 1,000 mL 超纯水，充分溶解。按上方分装表分配到各离心管。</p></div></div>
+      <div class="step highlight"><div class="step-n">02</div><div><h3>配制并加入模板剂</h3><p id="protocol-step-2">按体积比十六烷 : 乙酸丁酯 = 1 : 9 混匀；加入量为 LANa 水相体积的 3%（v/v）。</p></div></div>
+      <div class="step"><div class="step-n">03</div><div><h3>乳化与自组装</h3><p>将模板剂加入 LANa 水溶液，充分振荡、混匀。按记录超声约 3.5–6 h，每 30 min 振荡一次；每 1 h 取适量混合液检测粒径和 PDI，以粒径及 PDI 合适且稳定为参考终点。</p><p class="step-note">原记录未给出超声仪型号、实际功率和温控参数；不要自行将不同超声设备的参数视为等效。</p></div></div>
+      <div class="step"><div class="step-n">04</div><div><h3>紫外交联</h3><p>将乳化后的样品置于 365 nm 紫外光下照射 4 h，使 LANa 充分交联。</p><p class="step-note">原记录未注明紫外光强和样品液层厚度，复现实验时需另行记录。</p></div></div>
+      <div class="step"><div class="step-n">05</div><div><h3>末端处理</h3><p>取光照处理后的样品，通入空气约 1.5 h，使末端 —SH 充分氧化稳定。</p><p class="step-note">原记录提到用气味判断结束；不建议主动嗅闻样品，应以合适的理化检测判断反应情况。</p></div></div>
+      <div class="step"><div class="step-n">06</div><div><h3>透析纯化</h3><p>将反应液转移至 MWCO 1 kDa 的透析袋中，以 0.1× PBS 为透析介质；按记录透析 48 h，前 24 h 换液 6 次，后 24 h 换液 4 次。</p><p class="step-note">透析时间不能单独证明乙酸丁酯、十六烷或其他残留物已经完全去除。</p></div></div>
+      <div class="step"><div class="step-n">07</div><div><h3>最终质量控制</h3><p>收集透析后的 LANPs，检测粒径、Zeta 电位、PDI、ICP 浓度及 UV 光谱。</p><p class="step-note">用于动物饮水给药时，最终浓度应基于成品实测，不应直接以步骤 01 的投料浓度代替。</p></div></div>
+    </div>
+  </section>
+  <p class="footer">LANPs 制备与分装计算器 · 本地计算、不会上传实验数据 · 依据手写实验记录整理 · 每管40 mL LANa水相，随后加入3%模板剂；须确认管材及设备适用性</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  const $=(id)=>document.getElementById(id);
+  const fields=['water-volume','lan-conc','hex-ratio','butyl-ratio','template-excess'];
+  const get=(id)=>Number($(id).value);
+  const pct=3, waterPerTube=40;
+  let latest=null;
+  const fmt=(x,max=3)=>Number.isFinite(x)?new Intl.NumberFormat('zh-CN',{maximumFractionDigits:max}).format(x):'—';
+  const niceMass=(mg)=>mg>=1000?`${fmt(mg/1000,4)} g`:`${fmt(mg,3)} mg`;
+  const niceVol=(ml)=>ml>=1?`${fmt(ml,4)} mL`:`${fmt(ml*1000,3)} µL`;
+  const micro=(ml)=>`${fmt(ml*1000,3)} µL`;
+  const set=(id,value)=>{$(id).textContent=value;};
+  function compute(){
+    const v=get('water-volume'),c=get('lan-conc'),hex=get('hex-ratio'),butyl=get('butyl-ratio'),excess=get('template-excess');
+    let issue='';
+    if([v,c,hex,butyl].some(x=>!Number.isFinite(x)||x<=0))issue='请确认水相体积、LANa浓度、十六烷和乙酸丁酯比例均为大于0的有效数字。';
+    if(v>1e7||c>1e5||hex>1e5||butyl>1e5)issue='输入值超出计算器允许的范围，请检查。';
+    if(!Number.isFinite(excess)||excess<0||excess>100)issue='模板剂预配余量请输入 0–100% 之间的数值。';
+    $('error-display').style.display=issue?'block':'none';
+    $('error-display').textContent=issue;
+    if(issue){latest=null;['kpi-tubes','kpi-lana','kpi-template','kpi-final','recipe-lana','recipe-water','recipe-hex','recipe-butyl','recipe-template','recipe-required','recipe-extra','template-kpi-note','tube-total'].forEach(id=>set(id,'—'));$('per-tube-body').innerHTML='<tr><td colspan="7" style="text-align:center">请修正参数后查看计算结果</td></tr>';$('warning-box').style.display='none';return;}
+    const template=v*pct/100,finalVolume=v+template,lana=v*c;
+    const h=template*hex/(hex+butyl),b=template-h;
+    const extraTemplate=template*excess/100,prepTemplate=template+extraTemplate;
+    const prepHex=prepTemplate*hex/(hex+butyl),prepButyl=prepTemplate-prepHex;
+    // Each full tube gets 40 mL aqueous LANa solution; only the last tube may contain less.
+    const fullCount=Math.floor(v/waterPerTube);
+    let remainder=v-fullCount*waterPerTube;
+    if(remainder<1e-9)remainder=0; // suppress floating-point remainders
+    const hasPartial=remainder>0,tubeCount=fullCount+(hasPartial?1:0);
+    if(!Number.isSafeInteger(tubeCount)||tubeCount<1){$('error-display').style.display='block';$('error-display').textContent='计算所得管数超出支持范围，请减小输入体积。';latest=null;return;}
+    const makeTube=(water)=>{
+      const tp=water*pct/100,th=tp*hex/(hex+butyl);
+      return {water,lana:water*c,template:tp,hex:th,butyl:tp-th,final:water+tp,fill:(water+tp)/50*100};
+    };
+    const full=fullCount>0?makeTube(waterPerTube):null;
+    const partial=hasPartial?makeTube(remainder):null;
+    const primary=full||partial;
+    latest={v,c,pct,hex,butyl,excess,template,extraTemplate,prepTemplate,prepHex,prepButyl,finalVolume,lana,h,b,tubeCount,fullCount,hasPartial,full,partial,primary};
+    set('kpi-tubes',`${fmt(tubeCount,0)} 支`);
+    set('tube-count-detail',`${fullCount}支满管${hasPartial?` · 1支尾管`:''}`);
+    set('kpi-lana',niceMass(lana));set('lana-unit',`${fmt(lana,3)} mg`);
+    set('kpi-template',niceVol(prepTemplate));set('kpi-final',niceVol(finalVolume));
+    set('template-kpi-note',`实际加入 ${niceVol(template)} · 余量 ${niceVol(extraTemplate)}`);
+    set('recipe-lana',niceMass(lana));set('recipe-water',`${fmt(v,4)} mL`);
+    set('recipe-hex',niceVol(prepHex));set('recipe-butyl',niceVol(prepButyl));set('recipe-template',niceVol(prepTemplate));
+    set('recipe-required',niceVol(template));set('recipe-extra',niceVol(extraTemplate));
+    set('lan-formula',`${fmt(v,4)} mL × ${fmt(c,4)} mg/mL = ${fmt(lana,4)} mg`);
+    set('template-formula',`需加 ${niceVol(template)} × (1 + ${fmt(excess,3)}%) = 预配 ${niceVol(prepTemplate)}；十六烷 : 乙酸丁酯 = ${fmt(hex,4)} : ${fmt(butyl,4)}`);
+    set('tube-equivalence',`${fmt(tubeCount,0)} 管${hasPartial?' · 尾管单列':' · 满管40 mL'}`);
+    set('tube-graphic-label',full?'满管混合后理论装液量':'唯一一管混合后理论装液量');
+    set('tube-total',`${fmt(primary.final,4)} / 50 mL`);set('tube-fill-percent',`约占标称容量 ${fmt(primary.fill,2)}%`);
+    set('mode-chip','每管40 mL水相 + 3%模板剂');
+    const waterHeight=Math.min(100,primary.water/50*100),templateHeight=Math.min(100,primary.template/50*100);
+    $('water-fill').style.height=`${waterHeight}%`;
+    $('template-fill').style.bottom=`${waterHeight}%`;
+    $('template-fill').style.height=`${Math.min(templateHeight,100-waterHeight)}%`;
+    $('overflow-mark').style.display=primary.final>50+1e-9?'block':'none';
+    const row=(label,t)=>`<tr><td>${label}</td><td>${fmt(t.water,4)} mL</td><td>${niceMass(t.lana)}</td><td>${micro(t.template)}</td><td>${micro(t.hex)}</td><td>${micro(t.butyl)}</td><td>${fmt(t.final,4)} mL</td></tr>`;
+    let table='';
+    if(full)table+=row(fullCount===1?'第1管（满管）':`第1–${fmt(fullCount,0)}管（每管）`,full);
+    if(partial)table+=row(`第${fmt(tubeCount,0)}管（不足40 mL）`,partial);
+    table+=`<tr><td>全部合计（${fmt(tubeCount,0)}管）</td><td>${fmt(v,4)} mL</td><td>${niceMass(lana)}</td><td>${niceVol(template)}</td><td>${niceVol(h)}</td><td>${niceVol(b)}</td><td>${niceVol(finalVolume)}</td></tr>`;
+    $('per-tube-body').innerHTML=table;
+    const warning=$('warning-box');warning.style.display='flex';
+    if(primary.final>50){warning.className='alert error';set('warning-title','混合量超过标称容量');set('warning-text','请检查计算比例或输入值。');}
+    else{warning.className='alert ok';set('warning-title','按40 mL水相分装');set('warning-text',`${full?`满管为 40 mL LANa 水相 + ${micro(full.template)} 模板剂 = ${fmt(full.final,4)} mL`: `本管为 ${fmt(partial.water,4)} mL LANa 水相 + ${micro(partial.template)} 模板剂 = ${fmt(partial.final,4)} mL`}。${partial&&full?`末管另加 ${fmt(partial.water,4)} mL 水相及 ${micro(partial.template)} 模板剂。`:''}是否适于振荡/超声仍须核对离心管和设备说明。`);}
+    const tail1=partial?(full?`；最后1管 ${fmt(partial.water,4)} mL 水相`:`，本管水相 ${fmt(partial.water,4)} mL`):'';
+    set('protocol-step-1',`称取 ${niceMass(lana)} LANa，加入 ${fmt(v,4)} mL 超纯水，充分溶解；使用 ${fmt(tubeCount,0)} 支50 mL离心管，${full?`先装 ${fullCount} 管，每管40 mL 水相（折合每管 ${niceMass(full.lana)} LANa）`:''}${tail1}。`);
+    const tail2=partial?(full?`；末管另外加入 ${micro(partial.template)} 模板剂`:`本管加入 ${micro(partial.template)} 模板剂`):'';
+    set('protocol-step-2',`按十六烷 : 乙酸丁酯 = ${fmt(hex,4)} : ${fmt(butyl,4)} 预配含 ${fmt(excess,3)}% 余量的模板剂：十六烷 ${niceVol(prepHex)} + 乙酸丁酯 ${niceVol(prepButyl)}，共 ${niceVol(prepTemplate)}。实际只加入 ${niceVol(template)}，其余 ${niceVol(extraTemplate)} 留作操作余量。${full?`每个40 mL满管加入 ${micro(full.template)} 模板剂（折合十六烷 ${micro(full.hex)}、乙酸丁酯 ${micro(full.butyl)}）`:''}${tail2}。`);
+    document.querySelectorAll('.preset').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.volume)===v));
+  }
+  const clearFeedback=()=>{set('copy-feedback','');};
+  const tubeText=(label,t)=>`${label}：LANa水相 ${fmt(t.water,4)} mL（折合LANa ${niceMass(t.lana)}），模板剂 ${micro(t.template)}（十六烷 ${micro(t.hex)}、乙酸丁酯 ${micro(t.butyl)}），混合后 ${fmt(t.final,4)} mL`;
+  function reportText(x){return [
+    'LANPs 制备与分装计算清单',
+    `水相计划体积：${fmt(x.v,4)} mL`,
+    `LANa 投料浓度：${fmt(x.c,4)} mg/mL`,
+    `LANa 总质量：${niceMass(x.lana)} (${fmt(x.lana,4)} mg)`,
+    `固定分装方式：每管最多40 mL LANa水相，加入水相体积3%的模板剂`,
+    `模板剂配比（十六烷:乙酸丁酯）：${fmt(x.hex,4)}:${fmt(x.butyl,4)}`,
+    `实际需要加入模板剂：${niceVol(x.template)}`,
+    `模板剂预配余量：${fmt(x.excess,3)}% = ${niceVol(x.extraTemplate)}`,
+    `含余量预配模板剂：${niceVol(x.prepTemplate)}`,
+    `预配十六烷：${niceVol(x.prepHex)}`,
+    `预配乙酸丁酯：${niceVol(x.prepButyl)}`,
+    `实际加入十六烷（折算）：${niceVol(x.h)}`,
+    `实际加入乙酸丁酯（折算）：${niceVol(x.b)}`,
+    `混合后理论总体积：${niceVol(x.finalVolume)}`,
+    `50 mL 离心管：${x.tubeCount} 支（40mL满管 ${x.fullCount} 支${x.hasPartial?'，不足40mL尾管 1 支':''}）`,
+    ...(x.full?[tubeText(x.fullCount===1?'第1管（满管）':`第1–${x.fullCount}管（每管）`,x.full)]:[]),
+    ...(x.partial?[tubeText(`第${x.tubeCount}管（末管）`,x.partial)]:[]),
+    '注意：预配余量不属于投料量；不要把全部预配模板剂倒入水相。',
+    '注：水相按加入水量计；最终浓度需成品实测；实际可操作装液量需根据设备说明确认。'
+  ].join('\n');}
+  async function copyText(text){
+    if(navigator.clipboard && window.isSecureContext){try{await navigator.clipboard.writeText(text);return true;}catch(e){}}
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}ta.remove();return ok;
+  }
+  function csvCell(v){const s=String(v);return '"'+s.replace(/"/g,'""')+'"';}
+  function csvRow(items){return items.map(csvCell).join(',');}
+  function downloadCSV(x){
+    const rows=[['LANPs 制备分装表',''],['项目','数值','单位']];
+    rows.push(['LANa水相体积',x.v,'mL'],['LANa投料浓度',x.c,'mg/mL'],['LANa总量',x.lana,'mg'],['每管最大水相',40,'mL'],['模板剂占水相',3,'%'],['实际加入模板剂',x.template,'mL'],['模板剂额外预配余量',x.excess,'%'],['额外预配体积',x.extraTemplate,'mL'],['含余量预配模板剂',x.prepTemplate,'mL'],['预配十六烷',x.prepHex,'mL'],['预配乙酸丁酯',x.prepButyl,'mL'],['实际加入十六烷折算',x.h,'mL'],['实际加入乙酸丁酯折算',x.b,'mL'],['50 mL管数',x.tubeCount,'支']);
+    rows.push(['备注','模板剂多配部分不加入反应体系，仅作为操作余量','']);
+    rows.push([]);rows.push(['管号','水相(mL)','LANa(mg)','模板剂(µL)','十六烷(µL)','乙酸丁酯(µL)','混合后体积(mL)']);
+    const append=(label,t)=>rows.push([label,t.water,t.lana,t.template*1000,t.hex*1000,t.butyl*1000,t.final]);
+    if(x.tubeCount<=5000){for(let i=1;i<=x.fullCount;i++)append(i,x.full);if(x.partial)append(x.tubeCount,x.partial);}
+    else{if(x.full)append(`第1–${x.fullCount}管（每管同量）`,x.full);if(x.partial)append(`第${x.tubeCount}管（末管）`,x.partial);}
+    const blob=new Blob(['\uFEFF'+rows.map(csvRow).join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='LANPs分装表_'+fmt(x.v,2).replace(/,/g,'')+'mL.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  document.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{clearFeedback();compute();}));
+  document.querySelectorAll('.preset').forEach(btn=>btn.addEventListener('click',()=>{$('water-volume').value=btn.dataset.volume;compute();}));
+  $('reset').addEventListener('click',()=>{const defaults={'water-volume':1000,'lan-conc':10,'hex-ratio':1,'butyl-ratio':9,'template-excess':10};for(const id of fields){$(id).value=defaults[id];}clearFeedback();compute();});
+  $('copy').addEventListener('click',async()=>{if(!latest)return;const ok=await copyText(reportText(latest));set('copy-feedback',ok?'已复制配制清单':'复制受限，请使用打印或 CSV 导出');});
+  $('csv').addEventListener('click',()=>{if(latest)downloadCSV(latest);});
+  $('print').addEventListener('click',()=>window.print());
+  compute();
+})();
+</script>
+</body>
+</html>
