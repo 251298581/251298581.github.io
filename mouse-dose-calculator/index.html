@@ -94,15 +94,15 @@ LANa 饮水目标浓度 = 每只每日 LANa ÷ 平均饮水量<br>
     <div class="grid">
       <div class="card">
         <h2>LANPs 饮水给药</h2>
-        <div class="sub">LANPs 固定使用 <b>1.80 mg/mL 母液 / 分散液（按 LA 当量）</b>。本批 ICP-S 平行样品 22.8、22.0 mg/L，按 200 μL 原液充分消解、定容至 5 mL 换算。根据平均体重、饮水量和目标剂量计算终浓度、母液加入体积和补液体积。</div>
-        <div class="pill">LANPs 固定母液：1.80 mg/mL</div>
+        <div class="sub">LANPs 母液浓度<b>可自行修改（按 LA 当量，mg/mL）</b>。每次根据该批次 ICP-S 检测结果输入实际浓度，即可自动重新计算饮水配方；默认值为本批的 1.80 mg/mL。</div>
+        <div class="pill">当前LANPs母液：<span id="np_stock_display">1.80 mg/mL（LA当量）</span></div>
         <div class="fields">
+          <div><label for="np_stock">LANPs母液实际浓度（LA当量，mg/mL）</label><input id="np_stock" type="number" min="0.0001" step="0.01" value="1.80"></div>
           <div><label>小鼠只数</label><input id="np_n" type="number" step="1" value="9"></div>
           <div><label>平均体重 (g/只)</label><input id="np_wt" type="number" step="0.001" value="23"></div>
           <div><label>目标剂量（LA 当量，mg/kg/day）</label><input id="np_dose" type="number" step="0.01" value="120"></div>
           <div><label>平均饮水量 (mL/只/day)</label><input id="np_drink" type="number" step="0.01" value="4"></div>
           <div><label>计划最终配液体积 (mL)</label><input id="np_batch" type="number" step="0.1" value="40"></div>
-          <div><label>LANPs 母液浓度 (mg/mL)</label><input value="1.80" disabled></div>
         </div>
         <button class="btn" onclick="calcLANPs()">计算</button>
       </div>
@@ -115,10 +115,11 @@ LANa 饮水目标浓度 = 每只每日 LANa ÷ 平均饮水量<br>
           <div class="metric"><div class="k">整组理论每日需 LA 当量</div><div class="v" id="np_r4">—</div></div>
           <div class="metric primary"><div class="k">计划最终配液体积</div><div class="v" id="np_r5">—</div></div>
           <div class="metric primary"><div class="k">该体积所需 LA 当量</div><div class="v" id="np_r6">—</div></div>
-          <div class="metric primary"><div class="k">需加入 1.80 mg/mL 母液</div><div class="v" id="np_r7">—</div></div>
+          <div class="metric primary"><div class="k">需加入当前浓度的LANPs母液</div><div class="v" id="np_r7">—</div></div>
           <div class="metric primary"><div class="k">加母液后补水至终体积</div><div class="v" id="np_r8">—</div></div>
         </div>
-        <div class="notice" id="np_notice">本批LANPs：ICP-S推算 LA 当量浓度为 1.80 mg/mL。</div>
+        <div class="notice" id="np_notice">请输入该批LANPs的实际 LA 当量浓度。</div>
+        <div class="warn">浓度依据：须使用充分消解、经适当校准的 ICP-S 数据换算LA当量；测得的总硫不等于已经证明全部为完整LANPs。请确认分散液无明显聚沉并适合动物饮水。</div>
       </div>
     </div>
   </section>
@@ -156,13 +157,25 @@ LANa 饮水目标浓度 = 每只每日 LANa ÷ 平均饮水量<br>
   </section>
 
   <div class="footer-note">
-    说明：LANa 与 LANPs 饮水给药剂量均基于平均体重和平均饮水量估算。LANa 板块的目标剂量按 LA 当量输入；LANPs 板块按本批 ICP-S 结果固定使用 1.80 mg/mL（LA 当量）母液；D-gal 固定按 100 μL/只皮下注射。
+    说明：LANa 与 LANPs 饮水给药剂量均基于平均体重和平均饮水量估算。LANa 板块的目标剂量按 LA 当量输入；LANPs 板块的母液浓度可以根据各批 ICP-S 结果自行修改，单位为 LA 当量 mg/mL，浏览器会在本机记住最近一次有效输入；D-gal 固定按 100 μL/只皮下注射。
   </div>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
 const fmt=(x,d=3)=>Number.isFinite(x)?Number(x).toLocaleString('zh-CN',{maximumFractionDigits:d}):'—';
+const NP_STOCK_KEY='lanps_stock_la_equivalent_mgml_v1';
+function restoreNPStock(){
+  try {
+    const saved=window.localStorage.getItem(NP_STOCK_KEY);
+    if(saved!==null && saved.trim()!=='' && Number.isFinite(Number(saved)) && Number(saved)>0){$('np_stock').value=saved;}
+  } catch(e) { /* local storage may be unavailable in private browsing */ }
+}
+function saveNPStock(){
+  const raw=$('np_stock').value, val=Number(raw);
+  if(raw.trim()==='' || !Number.isFinite(val) || val<=0) return;
+  try { window.localStorage.setItem(NP_STOCK_KEY,raw); } catch(e) { /* still works without storage */ }
+}
 
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -196,7 +209,13 @@ function calcLANa(){
 function calcLANPs(){
   const n=parseFloat($('np_n').value), wt=parseFloat($('np_wt').value),
         dose=parseFloat($('np_dose').value), drink=parseFloat($('np_drink').value),
-        batch=parseFloat($('np_batch').value), stock=1.80;
+        batch=parseFloat($('np_batch').value), stock=parseFloat($('np_stock').value);
+  $('np_stock_display').textContent=Number.isFinite(stock)&&stock>0?fmt(stock,4)+' mg/mL（LA当量）':'请输入有效浓度';
+  if(![n,wt,dose,drink,batch,stock].every(x=>Number.isFinite(x)&&x>0)){
+    for(let i=1;i<=8;i++)$('np_r'+i).textContent='—';
+    $('np_notice').textContent='请输入大于0的有效数值；LANPs母液浓度应按本批LA当量填写。';
+    return;
+  }
   const per=wt/1000*dose, conc=per/drink, groupWater=n*drink,
         groupDrug=n*per, active=conc*batch, stockVol=active/stock,
         approxWater=batch-stockVol;
@@ -207,10 +226,10 @@ function calcLANPs(){
   $('np_r5').textContent=fmt(batch,2)+' mL';
   $('np_r6').textContent=fmt(active,3)+' mg';
   $('np_r7').textContent=fmt(stockVol,3)+' mL';
-  $('np_r8').textContent='约 '+fmt(approxWater,3)+' mL';
-  $('np_notice').textContent=approxWater<0
-    ?'当前参数要求的LA当量终浓度高于 1.80 mg/mL LANPs 母液浓度，不能通过简单稀释获得。'
-    :'配制 '+fmt(batch,2)+' mL 饮水时，按 LA 当量加入 1.80 mg/mL LANPs 母液 '+fmt(stockVol,3)+' mL，再补水定容至 '+fmt(batch,2)+' mL。';
+  $('np_r8').textContent=approxWater < -1e-9 ? '无法通过简单稀释配制' : '约 '+fmt(Math.max(0,approxWater),3)+' mL';
+  $('np_notice').textContent=approxWater < -1e-9
+    ?'当前目标饮水LA当量浓度 '+fmt(conc,4)+' mg/mL 高于母液浓度 '+fmt(stock,4)+' mg/mL，不能通过加水稀释实现；请调整条件，不要使用负补水量。'
+    :'配制 '+fmt(batch,2)+' mL 饮水时，按 LA 当量加入 '+fmt(stock,4)+' mg/mL LANPs 母液 '+fmt(stockVol,3)+' mL，再补水定容至 '+fmt(batch,2)+' mL。';
 }
 
 function calcDgal(){
@@ -231,11 +250,12 @@ function calcDgal(){
 document.querySelectorAll('input').forEach(el=>{
   el.addEventListener('input',()=>{
     if(el.id.startsWith('lana_'))calcLANa();
-    if(el.id.startsWith('np_'))calcLANPs();
+    if(el.id.startsWith('np_')){if(el.id==='np_stock')saveNPStock();calcLANPs();}
     if(el.id.startsWith('dg_'))calcDgal();
   });
 });
 
+restoreNPStock();
 calcLANa(); calcLANPs(); calcDgal();
 </script>
 </body>
